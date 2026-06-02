@@ -1,38 +1,21 @@
-// One card per team. A scored verdict leads with the headline number, then the
-// component breakdown (the visual center), the formula, and the commentary as
-// the closer. An unscored verdict is intentionally quieter — the asymmetry
-// tells the user one side has been graded and the other has not.
+// One card per team, presented in three depth layers:
+//   Layer 1 (glance): the number and tier word together — "77 · Strong".
+//   Layer 2 (visible): the component bars (the visual center) + the formula.
+//   Layer 3 (opt-in): an expandable disclosure with the verdict one-liner and
+//                      the longer description (see VerdictDetails).
+// An unscored verdict is intentionally quieter — the asymmetry tells the user
+// one side has been graded and the other has not.
+//
+// No letter grades and no color-coded grade: the score is goal-relative, so the
+// headline stays neutral (we don't paint "77" green to imply "good").
 import ComponentBreakdown from "./ComponentBreakdown.jsx";
-
-// Only the LETTER grade is color-coded; the 0–100 number stays neutral.
-function gradeClass(grade) {
-  const letter = grade?.[0]?.toUpperCase();
-  if (letter === "A") return "grade--a";
-  if (letter === "B") return "grade--b";
-  if (letter === "C") return "grade--c";
-  if (letter === "D" || letter === "F") return "grade--df";
-  return "grade--neutral";
-}
-
-function CardHeader({ team, goal }) {
-  return (
-    <header className="card__header">
-      <span className="card__team">{team}</span>
-      <span className="card__sep">·</span>
-      <span className="card__goal">{goal}</span>
-    </header>
-  );
-}
+import VerdictDetails from "./VerdictDetails.jsx";
+import NotYetScored from "./NotYetScored.jsx";
+import CardHeader from "./CardHeader.jsx";
 
 export default function VerdictCard({ verdict }) {
   if (verdict.status === "not yet scored") {
-    return (
-      <article className="card card--unscored">
-        <CardHeader team={verdict.team} goal={verdict.goal} />
-        <p className="card__unscored-label">Not yet scored</p>
-        <p className="card__unscored-note">{verdict.note}</p>
-      </article>
-    );
+    return <NotYetScored verdict={verdict} />;
   }
 
   return (
@@ -41,10 +24,8 @@ export default function VerdictCard({ verdict }) {
 
       <div className="card__headline">
         <span className="card__score">{verdict.overallScore}</span>
-        <span className="card__slash">/</span>
-        <span className={`card__grade ${gradeClass(verdict.overallGrade)}`}>
-          {verdict.overallGrade}
-        </span>
+        <span className="card__headline-sep">·</span>
+        <span className="card__tier">{verdict.tier}</span>
       </div>
 
       <ComponentBreakdown
@@ -54,7 +35,10 @@ export default function VerdictCard({ verdict }) {
 
       <p className="card__formula">{verdict.formula}</p>
 
-      <p className="card__commentary">{verdict.commentary}</p>
+      <VerdictDetails
+        oneLiner={verdict.verdict}
+        description={verdict.description}
+      />
     </article>
   );
 }

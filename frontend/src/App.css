@@ -1,23 +1,45 @@
-:root {
-  --bg: #f6f7f9;
-  --surface: #ffffff;
-  --ink: #1b1f24;
-  --ink-soft: #57606a;
-  --ink-faint: #8b949e;
-  --line: #d8dee4;
-  --line-soft: #eaeef2;
-  --accent: #0969da;
+/* ============================================================================
+   Theme system. Every color resolves to a CSS variable; components reference
+   variables only, never literals. Two complete themes share the SAME names:
+   :root is light, [data-theme="dark"] is dark. Flip the attribute on the
+   document root (App.jsx) to swap themes.
 
-  /* Letter-grade colors — applied to the LETTER only, never to component scores. */
-  --grade-a: #1a7f37;
-  --grade-b: #0969da;
-  --grade-c: #9a6700;
-  --grade-df: #cf222e;
+   Component bars use a single NEUTRAL fill in BOTH themes — length encodes the
+   score, color never encodes good/bad. That rule holds in light and dark.
+   ============================================================================ */
+:root {
+  --bg: #f5f7fa;
+  --surface: #ffffff;
+  --surface-sunken: #eef1f5; /* quieter panels (e.g. the not-yet-scored card) */
+  --ink: #141a21;
+  --ink-soft: #515c67;
+  --ink-faint: #8a939d;
+  --line: #d7dde4;
+  --line-soft: #e9edf1;
+  --accent: #1f6feb;
+  --accent-soft: rgba(31, 111, 235, 0.1); /* accent tint for tags/affordances */
+  --bar-track: #e6eaef;
+  --bar-fill: #6b7682; /* NEUTRAL — never good/bad colored */
+  --shadow: rgba(20, 26, 33, 0.06);
 
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica,
     Arial, sans-serif;
-  color: var(--ink);
-  background: var(--bg);
+}
+
+[data-theme="dark"] {
+  --bg: #0e1217;
+  --surface: #161c23;
+  --surface-sunken: #11161c;
+  --ink: #e7edf3;
+  --ink-soft: #aab4bf;
+  --ink-faint: #717c88;
+  --line: #2a323b;
+  --line-soft: #20272f;
+  --accent: #4d9bff;
+  --accent-soft: rgba(77, 155, 255, 0.16);
+  --bar-track: #262e37;
+  --bar-fill: #8b97a4; /* NEUTRAL — lighter so it reads on the dark track */
+  --shadow: rgba(0, 0, 0, 0.45);
 }
 
 * {
@@ -26,12 +48,40 @@
 
 body {
   margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  transition: background-color 0.2s ease, color 0.2s ease;
 }
 
 .app {
   max-width: 1040px;
   margin: 0 auto;
   padding: 40px 28px 72px;
+}
+
+/* ---- Top bar (theme toggle) ---- */
+.app__topbar {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 12px;
+}
+
+.theme-toggle {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  color: var(--ink-soft);
+  border-radius: 999px;
+  padding: 6px 14px;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: border-color 0.15s ease, color 0.15s ease, background-color 0.2s ease;
+}
+
+.theme-toggle:hover {
+  border-color: var(--accent);
+  color: var(--ink);
 }
 
 /* ---- Header ---- */
@@ -143,15 +193,16 @@ body {
   border: 1px solid var(--line);
   border-radius: 12px;
   padding: 24px 26px;
+  transition: background-color 0.2s ease, border-color 0.2s ease;
 }
 
 .card--scored {
   border-color: var(--line);
-  box-shadow: 0 1px 2px rgba(27, 31, 36, 0.04);
+  box-shadow: 0 1px 2px var(--shadow);
 }
 
 .card--unscored {
-  background: #fbfcfd;
+  background: var(--surface-sunken);
   border-style: dashed;
   color: var(--ink-soft);
 }
@@ -180,12 +231,14 @@ body {
   color: var(--ink-soft);
 }
 
-/* ---- Headline score ---- */
+/* ---- Headline: score · tier (Layer 1, the glance) ----
+   Neutral on purpose — the score is goal-relative, so we don't color it
+   good/bad. Prominence comes from size/weight, not hue. */
 .card__headline {
   display: flex;
   align-items: baseline;
-  gap: 8px;
-  margin-bottom: 22px;
+  gap: 10px;
+  margin-bottom: 20px;
 }
 
 .card__score {
@@ -193,42 +246,27 @@ body {
   font-weight: 700;
   line-height: 1;
   font-variant-numeric: tabular-nums;
-  color: var(--ink); /* number stays neutral */
+  color: var(--ink);
 }
 
-.card__slash {
+.card__headline-sep {
   font-size: 30px;
   color: var(--ink-faint);
 }
 
-.card__grade {
-  font-size: 38px;
+.card__tier {
+  font-size: 30px;
   font-weight: 700;
   line-height: 1;
-}
-
-.grade--a {
-  color: var(--grade-a);
-}
-.grade--b {
-  color: var(--grade-b);
-}
-.grade--c {
-  color: var(--grade-c);
-}
-.grade--df {
-  color: var(--grade-df);
-}
-.grade--neutral {
   color: var(--ink);
 }
 
-/* ---- Component breakdown (the feature) ---- */
+/* ---- Component breakdown (Layer 2, the visual center) ---- */
 .breakdown {
   display: flex;
   flex-direction: column;
-  gap: 16px;
-  padding: 18px 0 4px;
+  gap: 22px;
+  padding: 20px 0 6px;
   border-top: 1px solid var(--line-soft);
 }
 
@@ -251,7 +289,7 @@ body {
 }
 
 .component__score {
-  font-size: 20px;
+  font-size: 22px;
   font-weight: 700;
   font-variant-numeric: tabular-nums;
   color: var(--ink); /* neutral — not good/bad colored */
@@ -259,32 +297,53 @@ body {
   text-align: right;
 }
 
+/* The bar is the signature element — sized to be grasped at a glance, not a
+   thin debug rule. Single neutral fill in both themes: length encodes the
+   score, color does NOT encode good/bad. */
 .component__bar {
-  height: 5px;
-  background: var(--line-soft);
+  height: 12px;
+  background: var(--bar-track);
   border-radius: 999px;
-  margin: 7px 0 8px;
+  margin: 9px 0 0;
   overflow: hidden;
 }
 
 .component__bar-fill {
   height: 100%;
-  background: var(--ink-faint); /* neutral fill, no good/bad signal */
+  background: var(--bar-fill); /* neutral fill, no good/bad signal */
   border-radius: 999px;
 }
 
+.component__meta {
+  margin-top: 8px;
+}
+
+/* How this component folds into the headline number — ties each bar to the
+   formula line below the breakdown. */
+.component__contribution {
+  display: block;
+  font-size: 12px;
+  color: var(--ink-faint);
+  font-variant-numeric: tabular-nums;
+}
+
+.component__contribution strong {
+  color: var(--ink-soft);
+  font-weight: 700;
+}
+
 .component__note {
-  margin: 0;
+  margin: 4px 0 0;
   font-size: 13px;
   line-height: 1.45;
   color: var(--ink-soft);
 }
 
 .component--penalty .component__score {
-  color: var(--grade-df);
+  color: var(--accent);
 }
 
-/* ---- Formula + commentary ---- */
+/* ---- Formula ---- */
 .card__formula {
   margin: 20px 0 0;
   padding-top: 16px;
@@ -295,24 +354,88 @@ body {
   font-variant-numeric: tabular-nums;
 }
 
-.card__commentary {
-  margin: 14px 0 0;
+/* ---- Verdict disclosure (Layer 3, opt-in depth) ---- */
+.details {
+  margin-top: 18px;
+  padding-top: 14px;
+  border-top: 1px solid var(--line-soft);
+}
+
+.details__toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  background: none;
+  border: none;
+  padding: 0;
+  font: inherit;
   font-size: 14px;
-  line-height: 1.55;
+  font-weight: 600;
+  color: var(--accent);
+  cursor: pointer;
+}
+
+.details__toggle:hover {
+  text-decoration: underline;
+}
+
+.details__chevron {
+  font-size: 11px;
+}
+
+.details__body {
+  margin-top: 12px;
+}
+
+.details__oneliner {
+  margin: 0 0 10px;
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 1.5;
   color: var(--ink);
 }
 
-/* ---- Unscored card ---- */
-.card__unscored-label {
-  margin: 8px 0 6px;
-  font-size: 18px;
-  font-weight: 600;
-  color: var(--ink-faint);
+.details__description {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--ink-soft);
 }
 
-.card__unscored-note {
+/* ---- Not-yet-scored marker ----
+   A deliberate roadmap slot, not an empty hole. Quieter than the scored card
+   (dashed, sunken surface) but composed: a tag, a clear label, and a sub-line
+   that says why it's blank and what will fill it. Must still read as
+   "intentionally not done yet" in dark mode, where quiet elements can vanish —
+   hence ink-soft (not ink-faint) for the label and the accent-tinted tag. */
+.not-scored {
+  padding: 6px 0 4px;
+}
+
+.not-scored__tag {
+  display: inline-block;
+  margin-bottom: 12px;
+  padding: 3px 9px;
+  border-radius: 999px;
+  background: var(--accent-soft); /* "planned", not "error" */
+  color: var(--accent);
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.not-scored__label {
+  margin: 0 0 8px;
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--ink-soft); /* soft, not faint — intentional, not disabled */
+}
+
+.not-scored__note {
   margin: 0;
+  max-width: 34ch;
   font-size: 13px;
   line-height: 1.5;
-  color: var(--ink-soft);
+  color: var(--ink-faint);
 }

@@ -17,9 +17,11 @@ function describeProtection(prot) {
 }
 
 function gradeLine(label, grade) {
-  if (!grade) return `    ${label.padEnd(8)} -- / --`;
+  if (!grade) return `    ${label.padEnd(8)} -- · --`;
   const headline = grade.headline ? ` — ${grade.headline}` : '';
-  return `    ${label.padEnd(8)} ${grade.letter.padEnd(2)} / ${String(grade.score).padStart(3)}${headline}`;
+  // Number first, then the tier word (e.g. "90 · Franchise Win"). Mirrors the
+  // frontend's "score · tier" headline; no letter grades anymore.
+  return `    ${label.padEnd(8)} ${String(grade.score).padStart(3)} · ${grade.tier}${headline}`;
 }
 
 function groupFlows(assetFlows) {

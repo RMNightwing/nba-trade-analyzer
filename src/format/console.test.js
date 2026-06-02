@@ -75,22 +75,22 @@ describe('formatTradeAnalysis', () => {
     expect(out).toContain('(none yet)');
   });
 
-  it('renders a fully-scored verdict with grades', () => {
+  it('renders a fully-scored verdict with tiers (no letter grades)', () => {
     const v = createTeamVerdict({
       team: 'MIL',
       goalUsed: createGoal({ type: Goals.REBUILDING }),
       winLoss: WinLoss.WIN,
-      overallGrade: createOverallGrade({ letter: 'A-', score: 90, headline: 'strong rebuild move' }),
-      capGrade: createCapGrade({ letter: 'A', score: 95, headline: 'cap relief 2027+' }),
-      fitGrade: createFitGrade({ letter: 'B', score: 82, headline: 'young pieces fit timeline' }),
-      futureGrade: createFutureGrade({ letter: 'A+', score: 97, headline: 'three future firsts' }),
+      overallGrade: createOverallGrade({ score: 90, headline: 'strong rebuild move' }),
+      capGrade: createCapGrade({ score: 95, headline: 'cap relief 2027+' }),
+      fitGrade: createFitGrade({ score: 82, headline: 'young pieces fit timeline' }),
+      futureGrade: createFutureGrade({ score: 97, headline: 'three future firsts' }),
       keyDrivers: ['three future firsts', 'sheds long-term salary'],
     });
     const a = createTradeAnalysis({ trade: sampleTrade(), teamVerdicts: [v] });
     const out = formatTradeAnalysis(a);
     expect(out).toContain('MIL  (goal: REBUILDING)');
-    expect(out).toContain('Overall: A-');
-    expect(out).toContain('Cap:     A');
+    expect(out).toMatch(/Overall:\s+90 · Franchise Win/); // 90 → Franchise Win band
+    expect(out).toMatch(/Fit:\s+82 · Strong/); // 82 → Strong band
     expect(out).toContain('Win/Loss: WIN');
     expect(out).toContain('Key drivers: three future firsts; sheds long-term salary');
   });

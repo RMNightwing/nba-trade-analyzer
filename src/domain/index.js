@@ -9,5 +9,7 @@ export {
   createFitGrade,
   createFutureGrade,
   createOverallGrade,
+  tierForScore,
+  TIERS,
 } from './grades.js';
 export { createTeamVerdict, createTradeAnalysis, WinLoss } from './verdict.js';

@@ -49,30 +49,45 @@ up: its job is explicitly "balance two weighted halves," vs. REBUILDING's "score
 
 ## The rubric (0–100)
 
-| Band | Letter | Meaning for a REBUILDING team |
-|------|--------|-------------------------------|
-| **95–100** | A+ | Franchise-altering teardown win. Sheds the expensive vet *and* lands a foundational young cornerstone (≤22, rookie-scale, blue-chip upside) **plus** premium picks (unprotected, from teams likely to pick high) **plus** real cap relief. The realistic ceiling. |
-| **85–94** | A-/A | Excellent rebuild haul. Lots of future value — multiple unprotected-ish firsts + swaps + young players on good deals + major salary shed — but the youth is "useful," not foundational, **or** the picks are likely low-value. *(No real-fixture trade anchors this band yet — the ~97 hypothetical anchors the ceiling above it; see the example ladder.)* |
-| **75–84** | B/B+ | Solid, clearly goal-positive, with a visible flaw: picks heavily protected, some medium-term money taken back, or unproven youth without pick capital. Still a "yes." **The Giannis→Lakers Bucks return lands at ~77 here** — strong pick *count* + major salary relief, dragged by no foundational cornerstone and late-conveying picks. |
-| **70–74** | B- | Marginal pass (the project's "good trade" floor). Net-positive but thin — one good pick + filler, or youth without picks. |
-| **55–69** | C | Lateral. Doesn't advance the rebuild — mid-vet for mid-vet, picks wash, no flexibility gained. |
-| **40–54** | D | Goal-negative. Gives up future assets or takes on long-term money for a win-now piece the team doesn't need. |
-| **0–39** | F | Catastrophic. Trades away youth **and** picks for an aging expensive vet — locks in worse future *and* worse flexibility. The fan-Twitter mistake applied to a team that should be tearing down. |
+| Band | Tier | Meaning for a REBUILDING team |
+|------|------|-------------------------------|
+| **95–100** | Franchise Win | Franchise-altering teardown win. Sheds the expensive vet *and* lands a foundational young cornerstone (≤22, rookie-scale, blue-chip upside) **plus** premium picks (unprotected, from teams likely to pick high) **plus** real cap relief. The realistic ceiling. |
+| **85–94** | Franchise Win | Excellent rebuild haul. Lots of future value — multiple unprotected-ish firsts + swaps + young players on good deals + major salary shed — but the youth is "useful," not foundational, **or** the picks are likely low-value. *(No real-fixture trade anchors this band yet — the ~97 hypothetical anchors the ceiling above it; see the example ladder.)* |
+| **75–84** | Strong | Clearly goal-positive, with a visible flaw: picks heavily protected, some medium-term money taken back, or unproven youth without pick capital. Still a "yes." **The Giannis→Lakers Bucks return lands at ~77 here** — strong pick *count* + major salary relief, dragged by no foundational cornerstone and late-conveying picks. |
+| **70–74** | Solid | Marginal pass (the project's "good trade" floor). Net-positive but thin — one good pick + filler, or youth without picks. |
+| **55–69** | Lateral | Doesn't advance the rebuild — mid-vet for mid-vet, picks wash, no flexibility gained. |
+| **40–54** | Negative | Goal-negative. Gives up future assets or takes on long-term money for a win-now piece the team doesn't need. |
+| **0–39** | Damaging | Catastrophic. Trades away youth **and** picks for an aging expensive vet — locks in worse future *and* worse flexibility. The fan-Twitter mistake applied to a team that should be tearing down. |
+
+> **Tier model.** We dropped letter grades — the academic A–F scale (and the
+> briefly-considered idea of just reusing the standard academic scale) carried
+> baggage that fought the score's domain meaning. The tier word is now a
+> mechanical property of the score band; `tierForScore()` in
+> `src/domain/grades.js` is the single source of truth. The 85–100 **Franchise
+> Win** tier spans the two top rows above — the 95–100 ceiling and the 85–94
+> excellent-but-not-foundational range are shades of the same tier. And the
+> bottom of the scale is now spread across three distinct words — **Lateral**
+> (no progress), **Negative** (goal-negative), **Damaging** (catastrophic) —
+> rather than compressed.
 
 ### Anchored example trades
 
-- **~97** — Giannis out for a 21-yo former top-3 pick on rookie scale + 3 unprotected firsts
-  from a likely-bad team + a cheap young big + full cap relief. *Cornerstone + premium picks.*
-  This is the headroom that keeps the actual Giannis return below the ceiling.
-- **~77 — the actual Giannis→Lakers Bucks return.** Computed from the locked Q2 weights, not
-  gut feel (it was anchored at 88 during Q1; the formula corrects it down). See below.
-- **~70–72** — Giannis for 2 *protected* firsts + one young player + filler that includes a
-  medium-term contract. Good but flawed: thinner pick capital than the actual Giannis trade
-  (protected vs. unprotected, fewer bites), and a chunk of taken-back money that dents
-  flexibility — so it sits just below the actual return.
-- **~50** — Giannis for an established 28-yo All-Star on a max + one first. Lateral: they
-  re-tooled around a different expensive vet instead of tearing down. Wrong for REBUILDING.
-- **~30** — Giannis *plus* Knecht *plus* a pick for an aging, expensive veteran. Catastrophic.
+- **~97 — Franchise Win** — Giannis out for a 21-yo former top-3 pick on rookie scale + 3
+  unprotected firsts from a likely-bad team + a cheap young big + full cap relief.
+  *Cornerstone + premium picks.* This is the headroom that keeps the actual Giannis return
+  below the ceiling.
+- **~77 — Strong — the actual Giannis→Lakers Bucks return.** Computed from the locked Q2
+  weights, not gut feel (it was anchored at 88 during Q1; the formula corrects it down). See below.
+- **~70–72 — Solid** — Giannis for 2 *protected* firsts + one young player + filler that
+  includes a medium-term contract. Good but flawed: thinner pick capital than the actual
+  Giannis trade (protected vs. unprotected, fewer bites), and a chunk of taken-back money
+  that dents flexibility — so it sits just below the actual return.
+- **~50 — Negative** — Giannis for an established 28-yo All-Star on a max + one first. They
+  re-tooled around a different expensive vet instead of tearing down — wrong for REBUILDING.
+  (At ~50 this sits in the Negative band, 40–54; a true *Lateral* — picks wash, no flexibility
+  gained — would land in 55–69.)
+- **~30 — Damaging** — Giannis *plus* Knecht *plus* a pick for an aging, expensive veteran.
+  Catastrophic.
 
 ## The Giannis anchor — why ~77
 
@@ -105,9 +120,9 @@ capped component scores:
    upgrade — which makes the Lakers staying competitive (and the picks staying low-value)
    *more* likely, not less.
 
-So ~77 sits in the B+ band: real value, with named limitations that the additive formula
-captures mechanically. The A−/A band above it stays open because a better Giannis return
-(cornerstone + premium picks, the ~97 example) demonstrably exists on paper.
+So ~77 sits in the Strong band: real value, with named limitations that the additive formula
+captures mechanically. The Franchise Win band above it stays open because a better Giannis
+return (cornerstone + premium picks, the ~97 example) demonstrably exists on paper.
 
 > **Why not 88?** The Q1 anchor of 88 was set by gut feel, before the weights existed. An
 > additive weighted average cannot exceed its inputs: with picks capped at 82 and youth at 63
