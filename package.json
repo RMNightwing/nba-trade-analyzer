@@ -1,0 +1,17 @@
+{
+  "name": "nba-trade-analyzer",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Core scoring backend for evaluating NBA trades.",
+  "type": "module",
+  "scripts": {
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "show-teams": "node scripts/show-teams.js",
+    "show-teams:verbose": "node scripts/show-teams-verbose.js",
+    "show-giannis-trade": "node scripts/show-giannis-trade.js"
+  },
+  "devDependencies": {
+    "vitest": "^2.1.0"
+  }
+}

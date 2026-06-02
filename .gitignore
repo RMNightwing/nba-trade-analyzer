@@ -1,0 +1,21 @@
+.compound-engineering/config.local.yaml
+node_modules/
+coverage/
+.vitest-cache/
+*.log
+.DS_Store
+
+# Throwaway handoff bundle for sharing project state with a fresh session — not project history
+handoff/
+
+
+# Build output
+dist/
+build/
+
+# Editor
+.idea/
+.vscode/
+
+# Transient bundle artifacts
+*.zip
