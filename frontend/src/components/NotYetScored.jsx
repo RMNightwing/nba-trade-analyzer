@@ -9,10 +9,11 @@
 // Structured as its own component so swapping in the real fit-grade verdict
 // later is a clean replacement at the VerdictCard branch, not a rewrite.
 import CardHeader from "./CardHeader.jsx";
+import { teamSlugFromName } from "./teamSlug.js";
 
 export default function NotYetScored({ verdict }) {
   return (
-    <article className="card card--unscored">
+    <article className="card card--unscored" data-team={teamSlugFromName(verdict.team)}>
       <CardHeader team={verdict.team} goal={verdict.goal} />
 
       <div className="not-scored">

@@ -6,7 +6,17 @@
 // good/bad — they use one neutral fill — because the scores are goal-relative
 // (63 is "no cornerstone," not "bad"). Only the overall letter grade is colored.
 
+import { useEffect, useState } from "react";
+
 function ComponentRow({ label, weight, score, note, weightedContribution }) {
+  // Bar fills from 0 → score on mount. Pure presentation polish; CSS provides
+  // the transition and prefers-reduced-motion disables it.
+  const [filled, setFilled] = useState(false);
+  useEffect(() => {
+    const id = requestAnimationFrame(() => setFilled(true));
+    return () => cancelAnimationFrame(id);
+  }, []);
+
   return (
     <div className="component">
       <div className="component__head">
@@ -15,7 +25,10 @@ function ComponentRow({ label, weight, score, note, weightedContribution }) {
         <span className="component__score">{score}</span>
       </div>
       <div className="component__bar" aria-hidden="true">
-        <div className="component__bar-fill" style={{ width: `${score}%` }} />
+        <div
+          className="component__bar-fill"
+          style={{ width: filled ? `${score}%` : "0%" }}
+        />
       </div>
       <div className="component__meta">
         {weightedContribution != null && (
