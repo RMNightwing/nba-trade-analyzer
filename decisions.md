@@ -11,9 +11,9 @@ For the working design see [`docs/brainstorms/2026-05-29-trade-scoring-backend-r
 - **2026-05-29 — Cap depth: full first-/second-apron rules engine.** Modeled, not just labeled.
 - **2026-05-29 — Stat composite source: placeholder field.** `valueComposite` 0–100 per Player; real source slots in behind interface later.
 - **2026-05-29 — Pick value table: simplified Kevin Pelton chart.** Single hardcoded data file. Tunable later.
-- **2026-05-29 — Grade scale: both letter (A–F) and 0–100** surfaced everywhere.
+- **2026-05-29 — Grade scale: both letter (A–F) and 0–100** surfaced everywhere. ⚠️ *Superseded 2026-06-02 — letter grades dropped; output is now score (0–100) + tier word. See the 2026-06-02 output-model entry below.*
 - **2026-05-29 — Dimension weights: cap 30 / fit 30 / future 40**, configurable per call.
-- **2026-05-29 — Multi-team "good trade" threshold: every team ≥ B− (70)**, configurable.
+- **2026-05-29 — Multi-team "good trade" threshold: every team ≥ B− (70)**, configurable. ⚠️ *Updated 2026-06-02 — threshold value unchanged (70), but expressed as the "Solid" tier floor now, not "B−" (letter grades dropped). See the 2026-06-02 output-model entry below.*
 - **2026-05-29 — Domain types: plain object factory functions** (e.g., `createPlayer({...})`), not ES classes. Easier to reason about, easier to serialize.
 - **2026-05-29 — Asset discriminator field: every tradable asset has a `kind` field** (`'player'` or `'pick'`). Lets downstream code (formatter, cap math, fit math) branch without instanceof checks.
 - **2026-05-29 — Contract nested on Player.** Not a separate top-level entity. If we need to model sign-and-trade-created contracts later, we'll revisit.

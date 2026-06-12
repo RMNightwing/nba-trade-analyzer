@@ -2,9 +2,11 @@
 
 ## Status (Living Document)
 
-**Last updated:** 2026-05-30
+**Last updated:** 2026-06-12
 
-**Scoring philosophy — Q1 + Q2 settled (REBUILDING future-grade):** 0–100 rubric locked (goal-relative, pure future-only — present-year impact is what differentiates REBUILDING from RETOOLING). **Q2 weights locked: picks 45 / youth 30 / salary-shed 25**, combined as a straight additive weighted sum, with bad-money-taken-on as a separate duration-scaled penalty (additive Path A chosen over non-linear). Giannis→Lakers Bucks return **re-anchored 88 → ~77** (B+ band): the additive formula caps its components (picks 82 / youth 63 / salary 85) so it can't reach the gut-set 88 — real haul, but no foundational cornerstone and picks likely convey late. The return is **3 firsts + swap** (was mis-stated as 4). Full rubric + weights + anchors in [`docs/design/scoring-philosophy-future-rebuilding.md`](../design/scoring-philosophy-future-rebuilding.md). Q3 (pick-value table), Q4 (failure mode), Q5 (RETOOLING canary) still open.
+**Output model (updated 2026-06-02):** letter grades were dropped. Each grade now surfaces a **score (0–100) + tier word** (a mechanical lookup from the score band), and a verdict carries a trade-specific one-line **verdict** + paragraph **description**. `tierForScore()` in `src/domain/grades.js` is the single source of truth for the tier bands: 85+ Franchise Win / 75–84 Strong / 70–74 Solid / 55–69 Lateral / 40–54 Negative / <40 Damaging.
+
+**Scoring philosophy — Q1 + Q2 settled (REBUILDING future-grade):** 0–100 rubric locked (goal-relative, pure future-only — present-year impact is what differentiates REBUILDING from RETOOLING). **Q2 weights locked: picks 45 / youth 30 / salary-shed 25**, combined as a straight additive weighted sum, with bad-money-taken-on as a separate duration-scaled penalty (additive Path A chosen over non-linear). Giannis→Lakers Bucks return **re-anchored 88 → ~77** (Strong tier, 75–84 band): the additive formula caps its components (picks 82 / youth 63 / salary 85) so it can't reach the gut-set 88 — real haul, but no foundational cornerstone and picks likely convey late. The return is **3 firsts + swap** (was mis-stated as 4). Full rubric + weights + anchors in [`docs/design/scoring-philosophy-future-rebuilding.md`](../design/scoring-philosophy-future-rebuilding.md). Q3 (pick-value table), Q4 (failure mode), Q5 (RETOOLING canary) still open.
 
 This document is the working design contract for the trade scoring engine. It is updated as decisions get made — when something below shifts from "deferred" to "settled," or when a default gets replaced with a real choice, update this header and the relevant body section.
 
@@ -51,9 +53,9 @@ This document is the working design contract for the trade scoring engine. It is
 | --- | --- | --- |
 | Stat composite source | Placeholder `valueComposite` field (0–100) per player on the fixture | Real source slots in behind `PlayerRepository` later |
 | Pick value table | Simplified Kevin Pelton chart, hardcoded in a single data file | Tune later |
-| Grade scale | Both letter (A–F) and 0–100 surfaced | — |
+| Grade scale | 0–100 score + tier word (e.g. "Strong") surfaced | Letter grades dropped 2026-06-02; `tierForScore()` is the source of truth |
 | Dimension weights | cap 30 / fit 30 / future 40 | Configurable per call |
-| Multi-team "good trade" threshold | Every team's overall grade must be ≥ B− (70) | Configurable |
+| Multi-team "good trade" threshold | Every team's overall score must be ≥ 70 (the "Solid" tier floor) | Configurable |
 
 ### Decisions still open
 - None blocking implementation. The defaults above are explicit placeholders, not architectural commitments — when a real signal exists, replace it.
@@ -102,7 +104,7 @@ Trade (input)
       ├─ Fit grade        (advanced-stat delta + role-need fit)
       └─ Future grade     (asset trajectory vs goal)
   ↓
-[3] Per-team verdict (weighted combine → letter + win/loss)
+[3] Per-team verdict (weighted combine → score + tier + win/loss)
   ↓
 [4] Analyst persona layer (re-presents structured grade as commentary)
   ↓
@@ -121,7 +123,7 @@ These are the entities the engine reasons about. Field-level types and exact sto
 - **TeamSnapshot** — current roster, full cap state (salary total, cap, tax line, first apron, second apron, hard-cap status this season, trade exceptions, $ available), recent record proxy, draft picks owned (own + others')
 - **Goal** — enum: `CONTENDING`, `WIN_NOW`, `PLAYOFF_PUSH`, `RETOOLING`, `REBUILDING`, `STAR_HUNTING`, plus optional free-text notes carried alongside (e.g. "must shed Beal money")
 - **Trade** — N team participants, asset flows (`{asset, from_team, to_team}`), conditional add-ons (cash, swap rights triggered, etc.)
-- **CapGrade / FitGrade / FutureGrade** — each carries a letter, a 0–100 score, the headline finding, and structured evidence (numeric deltas, triggered rules, archetype matches) that personas can later quote
+- **CapGrade / FitGrade / FutureGrade** — each carries a 0–100 score, a tier word (derived from the score band), the headline finding, and structured evidence (numeric deltas, triggered rules, archetype matches) that personas can later quote
 - **TeamVerdict** — `{team, goalUsed, winLoss, overallGrade, [cap, fit, future] grades, keyDrivers}`
 - **TradeAnalysis** — `{trade, legal, [TeamVerdict], personaCommentary[]}`
 
@@ -139,7 +141,7 @@ The first/second apron rules drive both *legality* and *grading*. The engine mod
 - **TPE generation / usage**
 - **Cash considerations** ($ limits)
 
-Cap grade output: where each team lands (under cap / over cap / luxury tax / first apron / second apron), the restrictions newly triggered or lifted, the trajectory change (does this team gain or lose flexibility?), and a letter + 0–100 score. The grade penalizes legal-but-painful trades — pushing further into the second apron carries a real cost even when the math checks out.
+Cap grade output: where each team lands (under cap / over cap / luxury tax / first apron / second apron), the restrictions newly triggered or lifted, the trajectory change (does this team gain or lose flexibility?), and a 0–100 score + tier word. The grade penalizes legal-but-painful trades — pushing further into the second apron carries a real cost even when the math checks out.
 
 ### Basketball fit grade
 
@@ -150,7 +152,7 @@ For each team:
 - **Positional balance** — does the post-trade roster still have viable starting and bench rotations at all five positions?
 - **Age curve fit** — does the player's age trajectory match the team's competitive window?
 
-Output: letter + 0–100, plus structured findings ("gains plus-spacing wing, loses primary rim protector"). No lineup-level synergy modeling in v1; it's data-hungry and the hardest to debug when scores feel wrong. Slotted as a future enhancement if needed.
+Output: a 0–100 score + tier word, plus structured findings ("gains plus-spacing wing, loses primary rim protector"). No lineup-level synergy modeling in v1; it's data-hungry and the hardest to debug when scores feel wrong. Slotted as a future enhancement if needed.
 
 ### Future-projection grade (vs goal)
 
@@ -162,7 +164,7 @@ The grade depends on the team's `Goal`:
 - **REBUILDING** — weight assets accumulated: incoming picks, young players on cheap deals, expiring contracts, cap relief; current-year wins penalized lightly or ignored
 - **STAR_HUNTING** — weight optionality: cap room, tradable young talent, picks preserved for a future swing
 
-Output: letter + 0–100, with the headline phrased in the goal's terms ("Bucks: gains 3 future firsts and sheds long-term salary — strong rebuild move").
+Output: a 0–100 score + tier word, with the headline phrased in the goal's terms ("Bucks: gains 3 future firsts and sheds long-term salary — strong rebuild move").
 
 ## Goal Inference (Hybrid)
 
@@ -202,7 +204,7 @@ Adding a new persona is a config change, not a code change.
 ## Multi-Team Trades
 
 - N teams, each gets its own `TeamVerdict`
-- Trade-level "good trade" = every participating team's overall grade is ≥ B− (70). Configurable.
+- Trade-level "good trade" = every participating team's overall score is ≥ 70 (the "Solid" tier floor). Configurable.
 - The CBA legality engine handles three-team-trade routing rules (cap math is *not* just bilateral summed)
 - The asset-flow model already supports `{asset, from, to}` triples, so N-team is the same code path as 2-team
 
@@ -220,7 +222,7 @@ Validate the design without real data and without a UI:
 
 - **Fixture suite of historical trades** — known-good outcomes the engine should grade plausibly: Luka → Lakers, Harden → 76ers, KD → Suns, Dame → Bucks, Ben Simmons → Nets, etc. We don't expect the engine to predict outcomes; we expect grades to be defensible to a basketball fan
 - **Fixture suite of absurd trades** — rookie + two 2nds for an MVP — should grade harshly and the legality engine should usually reject before scoring
-- **The Giannis hypothetical** from the spec — explicitly modeled, including the asymmetric-goal case (Bucks = REBUILDING, contender = CONTENDING) where both verdicts can be A's
+- **The Giannis hypothetical** from the spec — explicitly modeled, including the asymmetric-goal case (Bucks = REBUILDING, contender = CONTENDING) where both verdicts can score high (each team wins for its own reasons)
 - **Apron edge cases** — second-apron team trying to aggregate (must fail legality); first-apron team taking back >100% (must fail); hard-cap triggered mid-trade
 - **Property tests** — every legal trade produces a complete `TradeAnalysis`; every illegal trade returns the specific legality failure
 - **Persona snapshot tests** — Windhorst commentary on a cap-bad trade must mention the apron; Lowe commentary on a redundancy must mention the role overlap
